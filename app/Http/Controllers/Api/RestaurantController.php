@@ -22,7 +22,7 @@ class RestaurantController extends Controller
         $name = $request->query('name');
         $day = $request->query('day');
         $opening_time = $request->query('opening_time');
-        $closing_time = $request->query('clsoing_time');
+        $closing_time = $request->query('closing_time');
         $grand_opening = $request->query('grand_opening');
         $date = $request->query('date');
 
@@ -37,24 +37,40 @@ class RestaurantController extends Controller
 
         $data = $this->restaurantRepositoryInterface->index($data_query);
 
-        return ApiResponseClass::sendResponse($data, 'Restaurants retrieved successfully.', 200);
+        $result = [
+            'data' => $data,
+            'code' => 200
+        ];
+
+        return ApiResponseClass::sendResponse($result, 'Restaurants retrieved successfully.', 200);
     }
 
     public function store(Request $request)
     {
         $name = $request->name;
         $operating_hours = $request->operating_hours;
+        $roles = $request->roles;
 
         $data = [
             'name' => $name,
-            'operating_hours' => $operating_hours
+            'operating_hours' => $operating_hours,
+            'roles' => $roles
         ];
 
         DB::beginTransaction();
         try {
-            $result = $this->restaurantRepositoryInterface->store($data);
+            $data = $this->restaurantRepositoryInterface->store($data);
             DB::commit();
-            return ApiResponseClass::sendResponse($result, 'Restaurants created successfully.', 200);
+
+            $message = $data['message'];
+            unset($data['message']);
+            $result = [
+                'data' => $data,
+                'code' => $data['code']
+            ];
+
+
+            return ApiResponseClass::sendResponse($result, $message, 200);
         } catch (\Exception $e) {
             return ApiResponseClass::rollback($e);
         }

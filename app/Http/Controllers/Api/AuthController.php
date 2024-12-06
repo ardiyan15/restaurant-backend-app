@@ -26,11 +26,14 @@ class AuthController extends Controller
 
         $data = $this->authRepositoryInterface->login($request);
 
-        $token = $data['data'];
-        $message = $data['message'];
-        $code = $data['code'];
+        $result = [
+            'data' => $data['data'],
+            'code' => $data['code']
+        ];
 
-        return ApiResponseClass::sendResponse($token, $message, $code);
+        $message = $data['message'];
+
+        return ApiResponseClass::sendResponse($result, $message);
     }
 
     public function logout()

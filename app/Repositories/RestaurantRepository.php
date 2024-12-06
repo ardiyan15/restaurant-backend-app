@@ -5,14 +5,13 @@ namespace App\Repositories;
 use App\Models\Restaurant;
 use App\Interfaces\RestaurantRepositoryInterface;
 use App\Models\OperatingHour;
-use Carbon\Carbon;
 
 class RestaurantRepository implements RestaurantRepositoryInterface
 {
     public function index($data)
     {
         $restaurants = Restaurant::select('id', 'name', 'created_at',)->with(['operatingHours' => function ($query) {
-            $query->select('restaurant_id', 'day', 'opening_time', 'closing_time');
+            $query->select('id', 'restaurant_id', 'day', 'opening_time', 'closing_time');
         }]);
 
         if (!empty($data['name'])) {
@@ -31,7 +30,7 @@ class RestaurantRepository implements RestaurantRepositoryInterface
             });
         }
 
-        if (!empty($data['grand_opening'])) {
+        if (!empty($data['closing_time'])) {
             $restaurants->whereHas('operatingHours', function ($query) use ($data) {
                 $query->where('closing_time', '<=', $data['closing_time']);
             });
@@ -41,7 +40,7 @@ class RestaurantRepository implements RestaurantRepositoryInterface
             $restaurants->whereDate('created_at', $data['date']);
         }
 
-        $restaurants = $restaurants->paginate(10);
+        $restaurants = $restaurants->orderBy('id', 'desc')->paginate(10);
 
         return $restaurants;
     }
@@ -53,6 +52,16 @@ class RestaurantRepository implements RestaurantRepositoryInterface
 
     public function store(array $data)
     {
+        if ($data['roles'] != 'admin') {
+            $data = [
+                'data' => [],
+                'message' => 'Forbidden',
+                'code' => 403,
+            ];
+
+            return $data;
+        }
+
         $name = $data['name'];
         $operating_hours = $data['operating_hours'];
 
@@ -77,6 +86,9 @@ class RestaurantRepository implements RestaurantRepositoryInterface
         }
 
         OperatingHour::insert($operating_hour_temp);
+
+        $data['message'] = 'Restaurant created successfully';
+        $data['code'] = 200;
 
         return $data;
     }

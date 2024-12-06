@@ -10,6 +10,7 @@ class ApiResponseClass
 {
     public static function rollback($e, $message = "Something went wrong! Process not completed", $code = 500)
     {
+        dd($e->getMessage());
         DB::rollBack();
         $response = [
             'success' => false,
@@ -30,9 +31,10 @@ class ApiResponseClass
     {
         $response = [
             'success' => true,
-            'response_code' => $code,
-            'data'    => $result
+            'response_code' => $result['code'],
+            'data'    => $result['data']
         ];
+
         if (!empty($message)) {
             $response['message'] = $message;
         }

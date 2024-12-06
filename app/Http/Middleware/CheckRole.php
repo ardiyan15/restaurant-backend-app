@@ -16,13 +16,6 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if($request->roles !== 'admin') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized: You do not have the required role to access this resource.'
-            ], 403);
-        }
-
         return $next($request);
     }
 }

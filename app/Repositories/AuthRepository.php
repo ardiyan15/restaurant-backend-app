@@ -15,7 +15,7 @@ class AuthRepository implements AuthRepositoryInterface
         if (!Auth::attempt($request->only('email', 'password'))) {
             $data = [
                 'data' => [],
-                'message' => 'Unauthorized',
+                'message' => 'Invalid email or password',
                 'code' => 401,
             ];
 
@@ -26,10 +26,15 @@ class AuthRepository implements AuthRepositoryInterface
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        $user_data = [
+            'token' => $token,
+            'roles' => $user->roles
+        ];
+
         $data = [
-            'code' => 200,
-            'data' => $token,
+            'data' => $user_data,
             'message' => 'Login success',
+            'code' => 200,
         ];
 
         return $data;

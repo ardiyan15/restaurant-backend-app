@@ -8,9 +8,9 @@ class Restaurant extends Model
 {
     protected $table = 'restaurants';
 
-    // protected $fillable = [
-    //     'name'
-    // ];
+    protected $fillable = [
+        'name'
+    ];
 
     public function operatingHours()
     {
